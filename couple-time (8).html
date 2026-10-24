@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>وقت خالی ما</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+:root{--bg:#f3f4f8;--card:#fff;--ink:#1d2230;--mut:#6b7385;--line:#e3e6ee;--acc:#4f5bd5;--on:#fff;--free:#e9a23b;--freebg:#fbebd0;--sh:0 2px 10px rgba(30,40,80,.08);color-scheme:light dark}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11141b;--card:#1a1e29;--ink:#eceff5;--mut:#98a1b3;--line:#2a3040;--acc:#8f9bff;--on:#10131c;--free:#f0b45a;--freebg:#33291a;--sh:none;color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.7 Vazirmatn,Tahoma,sans-serif;max-width:560px;margin-inline:auto;padding:14px 14px 96px}
+h1{font-size:22px;font-weight:800;margin:2px 0}
+h2{font-size:16px;font-weight:600;margin:0 0 8px}
+.mut{color:var(--mut);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin:12px 0;box-shadow:var(--sh)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.grow{flex:1;min-width:90px}
+button,select,input{font:inherit;color:var(--ink)}
+button{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:7px 12px;cursor:pointer}
+button.pri{background:var(--acc);color:var(--on);border-color:var(--acc);font-weight:600;padding:9px 18px}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+select,input[type=time],input[type=text],input[type=password]{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px 10px;width:100%}
+label{display:flex;flex-direction:column;font-size:12px;color:var(--mut);gap:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chip{display:flex;align-items:center;gap:6px;border-radius:99px;padding:4px 12px}
+.chip.sel{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%}
+.item{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:6px 0;font-size:14px}
+.item:last-child{border:0}
+.x{border:0;background:none;color:var(--mut);font-size:18px;padding:0 6px}
+.err{color:#c2410c;font-size:13px}
+.tabs{position:fixed;inset-inline:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding:6px 10px calc(6px + env(safe-area-inset-bottom,0px));gap:8px;max-width:560px;margin-inline:auto}
+.tabs button{flex:1;border:0;background:none;padding:8px;font-weight:600;color:var(--mut)}
+.tabs button.on{color:var(--acc);background:var(--bg)}
+.nav{display:flex;justify-content:space-between;align-items:center;margin:8px 0}
+.axis{position:relative;height:16px;margin-inline-start:58px}
+.axis span{position:absolute;font-size:11px;color:var(--mut);transform:translateX(50%)}
+.line{display:flex;align-items:center;margin:3px 0}
+.line b{width:58px;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar{flex:1;position:relative;height:16px;background:var(--bg);border-radius:6px;overflow:hidden}
+.bar i{position:absolute;top:0;bottom:0;border-radius:4px}
+.bar i.f{background:var(--free)}
+.day h2{display:flex;justify-content:space-between}
+.free{margin-top:6px;font-size:13px;background:var(--freebg);border-radius:10px;padding:4px 10px}
+.free.none{background:var(--bg);color:var(--mut)}
+.chart{display:flex;align-items:flex-end;gap:6px;height:90px;margin-top:8px}
+.chart div{flex:1;text-align:center;font-size:11px;color:var(--mut)}
+.chart i{display:block;background:var(--free);border-radius:6px 6px 0 0;min-height:3px;margin-bottom:2px}
+.today{text-align:center;margin:8px 0 4px}.today b{font-size:17px;font-weight:800}.badge{background:var(--acc);color:var(--on);border-radius:99px;font-size:11px;padding:0 8px;margin-inline-start:6px}.day.now{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc)}
+.code{font:600 20px/1 monospace;letter-spacing:3px;direction:ltr;background:var(--bg);padding:8px 12px;border-radius:10px;display:inline-block}
+
+/* ---- v3: app-like look, pill buttons, glass ---- */
+:root{--glass:rgba(255,255,255,.58);--glass-line:rgba(255,255,255,.75);--glass-sh:0 8px 28px rgba(40,50,100,.12);--tonal:rgba(79,91,213,.09);--tonal2:rgba(79,91,213,.16);--sh:0 1px 2px rgba(30,40,80,.05),0 6px 20px rgba(30,40,80,.06)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--glass:rgba(26,30,41,.6);--glass-line:rgba(255,255,255,.12);--glass-sh:0 8px 28px rgba(0,0,0,.4);--tonal:rgba(143,155,255,.15);--tonal2:rgba(143,155,255,.26)}}
+@supports not (backdrop-filter:blur(1px)){:root{--glass:var(--card)}}
+body{padding-bottom:112px}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(60% 38% at 12% 0%,rgba(233,162,59,.16),transparent 70%),radial-gradient(50% 36% at 100% 22%,rgba(79,91,213,.14),transparent 70%),radial-gradient(60% 40% at 45% 100%,rgba(91,127,166,.2),transparent 70%)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) body::before{background:radial-gradient(60% 38% at 12% 0%,rgba(240,180,90,.08),transparent 70%),radial-gradient(50% 36% at 100% 22%,rgba(143,155,255,.12),transparent 70%),radial-gradient(60% 40% at 45% 100%,rgba(91,127,166,.14),transparent 70%)}}
+h1{font-size:24px;letter-spacing:-.2px}
+.card{border-radius:20px;padding:16px}
+button{border-radius:99px;padding:8px 16px;background:var(--tonal);color:var(--acc);border:0;font-weight:600;transition:transform .12s,background .15s}
+button:active{transform:scale(.96)}
+button.pri{background:var(--acc);color:var(--on);padding:10px 22px;box-shadow:0 4px 14px rgba(79,91,213,.28)}
+.x{background:none;color:var(--mut);font-weight:400;padding:0 8px}
+.chip{background:var(--tonal);color:var(--ink);font-weight:400;border:1.5px solid transparent;padding:6px 14px}
+.chip.sel{background:var(--tonal2);border-color:var(--acc);box-shadow:none;font-weight:600}
+select,input[type=time],input[type=text],input[type=password]{border-radius:14px;padding:9px 12px}
+.glass,.today,.tabs,.nav button,#p2>.card:not(.day),#auth .card{background:var(--glass);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:1px solid var(--glass-line);box-shadow:var(--glass-sh),inset 0 1px 0 rgba(255,255,255,.35)}
+.today{border-radius:22px;padding:10px 16px;margin:10px 0 6px}
+.tabs{inset-inline:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));max-width:536px;margin-inline:auto;border-radius:28px;padding:6px;gap:6px}
+.tabs button{border-radius:22px;padding:10px;background:none;color:var(--mut);box-shadow:none}
+.tabs button.on{background:var(--tonal2);color:var(--acc)}
+.nav button{width:42px;height:42px;padding:0;font-size:20px;border-radius:50%}
+.day.now{box-shadow:0 0 0 2px var(--acc),var(--sh)}
+.badge{padding:1px 10px}
+.axis{margin-inline:75px 17px;margin-top:4px}
+.day{cursor:pointer}
+.det{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px;cursor:default}
+.dp{margin:6px 0}.dp b{font-size:13px}
+.it{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:14px}
+.tm{white-space:nowrap}
+.d3.now{box-shadow:0 0 0 2px var(--acc),var(--sh)}
+.tabs button{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.toast{position:fixed;inset-inline:0;margin-inline:auto;width:max-content;max-width:90%;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:50;padding:10px 20px;border-radius:99px;font-weight:600;background:var(--glass);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:1px solid var(--glass-line);box-shadow:var(--glass-sh);animation:tup .2s}
+.toast.bad{color:#c2410c}
+@keyframes tup{from{opacity:0;transform:translateY(8px)}}
+button:disabled{opacity:.6;pointer-events:none}
+
+/* ---- v6 ---- */
+label{min-width:0}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-top:8px}
+.two input,#fDay{min-width:0;width:100%;max-width:100%;-webkit-appearance:none;appearance:none;height:44px;text-align:center;text-align-last:center;direction:ltr}
+#fDay{direction:rtl}
+.sws{display:flex;flex-wrap:wrap;gap:9px;margin:6px 0 4px}
+.sw{width:28px;height:28px;border-radius:50%;padding:0;border:2px solid transparent;box-shadow:0 0 0 2px var(--card) inset}
+.sw.on{border-color:var(--ink)}
+.cr{padding:8px 0;border-bottom:1px solid var(--line)}
+.cr:last-of-type{border:0}
+.ib{background:none;color:var(--mut);font-size:16px;padding:0 8px;font-weight:400}
+.ib.pen{color:var(--acc)}
+.tabs button{font-size:12.5px;padding:10px 4px}
+.lg{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}
+.lg:last-child{border:0}
+.lg .grow{min-width:0}
+.donut{display:block;width:210px;max-width:70%;margin:6px auto 12px}
+.card h2 .mut{font-weight:400}
+
+.ied{width:100%;margin-top:8px;padding:12px;border-radius:16px;background:var(--bg)}
+.ied select,.ied input[type=time]{height:44px;width:100%;background:var(--card)}
+.ied .two input{background:var(--card)}
+</style>
+</head>
+<body>
+<section id="auth" hidden>
+  <h1>وقت خالی ما</h1>
+  <div class="mut">هرکس با حساب خودش وارد می‌شود و فقط برنامه‌ی خودش را ویرایش می‌کند.</div>
+  <div class="card">
+    <div class="row" style="margin-bottom:10px"><button id="bIn" class="pri" onclick="setMode('in')">ورود</button><button id="bUp" onclick="setMode('up')">ساخت حساب</button></div>
+    <label id="dnWrap" hidden style="margin-bottom:8px">اسم نمایشی<input type="text" id="dName" placeholder="مثلاً سارا"></label>
+    <label style="margin-bottom:8px">نام کاربری (انگلیسی)<input type="text" id="uName" autocapitalize="none" autocomplete="username" dir="ltr"></label>
+    <label style="margin-bottom:10px">رمز عبور (حداقل ۶ حرف)<span style="position:relative;display:block"><input type="password" id="uPass" autocomplete="current-password" dir="ltr" style="padding-left:44px"><button type="button" id="eye" onclick="eyeTog()" aria-label="نمایش رمز" style="position:absolute;left:4px;top:3px;border:0;background:none;font-size:18px">👁</button></span></label>
+    <div class="row"><button class="pri" id="goBtn" onclick="go()">ورود</button><span id="aMsg" class="err"></span></div>
+  </div>
+</section>
+
+<main id="app" hidden>
+<section id="p1">
+  <div class="row" style="justify-content:space-between"><h1>برنامه‌ی من</h1><button onclick="logout()">خروج</button></div>
+  <div class="today"><span class="mut">امروز</span><br><b id="todayTxt"></b></div>
+  <div class="card" id="formCard">
+    <h2 id="formTitle">مشغله‌ی جدید</h2>
+    <label>روز<select id="fDay"></select></label>
+    <div class="two">
+      <label>از<input type="time" id="fS" value="09:00"></label>
+      <label>تا<input type="time" id="fE" value="15:00"></label>
+    </div>
+    <div class="mut" style="margin-top:8px">دسته</div>
+    <div class="chips" id="chips"></div>
+    <button onclick="togEdit()" id="edBtn">✎ ویرایش دسته‌ها</button>
+    <div id="edit" hidden style="margin-top:8px"></div>
+    <label style="flex-direction:row;align-items:center;gap:6px;font-size:14px;color:var(--ink);margin:10px 0"><input type="checkbox" id="fRep" checked style="width:auto"> هر هفته تکرار شود</label>
+    <div class="mut" style="margin:-6px 0 8px">بدون تیک، فقط برای تاریخ کنار نام روز ثبت می‌شود (هفته‌ی انتخاب‌شده در «وقت‌های ما»).</div>
+    <div class="row"><button class="pri" id="svBtn" onclick="add(this)">ذخیره</button><span id="msg" class="err"></span></div>
+  </div>
+  <div class="nav">
+    <button onclick="wk(-1)" aria-label="هفته قبل">‹</button>
+    <div style="text-align:center"><b id="wkLabel1"></b><div class="mut" id="wkSub1"></div></div>
+    <button onclick="wk(1)" aria-label="هفته بعد">›</button>
+  </div>
+  <div class="card"><h2>برنامه‌های ثبت‌شده</h2><div id="mine"></div></div>
+  <div class="card" id="link"></div>
+</section>
+
+<section id="p2" hidden>
+  <h1>وقت‌های ما</h1>
+  <div id="noPartner" class="card mut" hidden>هنوز به پارتنر وصل نیستی. از صفحه‌ی «برنامه‌ی من» کد دعوت را بده یا کد او را وارد کن.</div>
+  <div class="nav">
+    <button onclick="wk(-1)" aria-label="هفته قبل">‹</button>
+    <div style="text-align:center"><b id="wkLabel"></b><div class="mut" id="wkSub"></div></div>
+    <button onclick="wk(1)" aria-label="هفته بعد">›</button>
+  </div>
+  <div class="card">
+    <div class="row"><b id="total"></b><span class="grow"></span>
+      <select id="minLen" style="width:auto" onchange="minLen=+this.value;draw()"><option value="30">حداقل نیم ساعت</option><option value="60" selected>حداقل ۱ ساعت</option><option value="120">حداقل ۲ ساعت</option><option value="180">حداقل ۳ ساعت</option></select></div>
+    <div class="chart" id="chart"></div>
+  </div>
+  <div id="days"></div>
+</section>
+
+<section id="p3" hidden>
+  <h1 id="p3Title">برنامه‌ی پارتنر</h1>
+  <div id="noPartner3" class="card mut" hidden>هنوز به پارتنر وصل نیستی. از صفحه‌ی «برنامه‌ی من» کد دعوت را بده یا کد او را وارد کن.</div>
+  <div class="nav">
+    <button onclick="wk(-1)" aria-label="هفته قبل">‹</button>
+    <div style="text-align:center"><b id="wkLabel3"></b><div class="mut" id="wkSub3"></div></div>
+    <button onclick="wk(1)" aria-label="هفته بعد">›</button>
+  </div>
+  <div class="mut" style="margin:0 4px 4px">فقط برای دیدن است؛ ویرایش فقط از حساب خودش ممکن است.</div>
+  <div id="theirs"></div>
+</section>
+<section id="p4" hidden>
+  <h1>برنامه‌ی ماهانه</h1>
+  <div class="nav">
+    <button onclick="mo(-1)" aria-label="ماه قبل">‹</button>
+    <div style="text-align:center"><b id="mLabel"></b><div class="mut" id="mSub"></div></div>
+    <button onclick="mo(1)" aria-label="ماه بعد">›</button>
+  </div>
+  <div class="card">
+    <div class="row" style="margin-bottom:6px"><b class="grow">زمان صرف‌شده در هر دسته</b><select id="mWho" style="width:auto" onchange="mWhoV=+this.value;drawMonth()"></select></div>
+    <div id="mBody"></div>
+  </div>
+</section>
+<nav class="tabs"><button id="t1" class="on" onclick="tab(1)">برنامه‌ی من</button><button id="t3" onclick="tab(3)">برنامه‌ی او</button><button id="t2" onclick="tab(2)">وقت‌های ما</button><button id="t4" onclick="tab(4)">ماهانه</button></nav>
+</main>
+
+<script>
+const sb=supabase.createClient('https://nynoskvhyuryrcfdtfko.supabase.co','sb_publishable_XM4THsd2G1t1WEYEyrfJgA_0ZCks0yh');
+const DAYS=['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه'];
+const T0=360,T1=1440,F0=480,F1=1380;
+const fa=s=>String(s).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
+const hm=m=>fa(String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'));
+const tm=v=>{const p=v.split(':');return +p[0]*60+ +p[1]};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const jd=(d,o)=>new Intl.DateTimeFormat('fa-IR-u-ca-persian',o).format(d);
+const $=id=>document.getElementById(id);
+const PAL=['#3b6fd8','#2a97ad','#2f9e6b','#8bb02f','#d4a017','#e07b39','#c2553d','#d63f6c','#8a5cd0','#7a8794'];
+let moff=0,mWhoV=0,eid=null,newCol=PAL[3],newName='';
+let uid=null,mp=null,pt=null,cats=[],items=[],off=0,minLen=60,selCat=null,editing=false,mode='in',chan=null,tmr=null;
+
+function setMode(m){mode=m;$('dnWrap').hidden=m!=='up';$('goBtn').textContent=m==='up'?'ساخت حساب':'ورود';$('bIn').className=m==='in'?'pri':'';$('bUp').className=m==='up'?'pri':'';aMsg.textContent=''}
+function eyeTog(){const s=uPass.type==='password';uPass.type=s?'text':'password';eye.textContent=s?'🙈':'👁'}
+function fix(m){m=String(m||'');if(/invalid/i.test(m)&&/email/i.test(m))return 'این نام کاربری پذیرفته نشد؛ یک اسم دیگر امتحان کن.';if(/Invalid login/i.test(m))return 'نام کاربری یا رمز اشتباه است.';if(/already registered|already exists/i.test(m))return 'این نام کاربری قبلاً گرفته شده.';if(/at least 6|weak/i.test(m))return 'رمز باید حداقل ۶ حرف باشد.';if(/rate limit/i.test(m))return 'تعداد تلاش زیاد شد، کمی بعد دوباره امتحان کن.';return m}
+function go(){return guard(goBtn,'صبر کن…',goInner)}
+let inflight=false,tT;
+function toast(t,k){clearTimeout(tT);tstEl.textContent=t;tstEl.className='toast'+(k==='bad'?' bad':'');tstEl.hidden=false;tT=setTimeout(()=>{tstEl.hidden=true},2400)}
+async function guard(btn,label,fn,ok){
+  if(inflight)return;inflight=true;const t=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent=label}
+  try{const r=await fn();if(r!==false&&ok)toast(ok)}catch(e){toast('خطا: '+(e.message||e),'bad')}
+  finally{inflight=false;if(btn){btn.disabled=false;btn.textContent=t}}
+}
+async function goInner(){
+  const raw=uName.value.trim().toLowerCase(),pw=uPass.value,un=raw.split('@')[0];
+  if(!raw||!pw){aMsg.textContent='نام کاربری و رمز را وارد کن.';return}
+  if(!raw.includes('@')&&!/^[a-z0-9_.]{3,}$/.test(raw)){aMsg.textContent='نام کاربری: حروف انگلیسی، عدد، _ یا . و حداقل ۳ حرف.';return}
+  const email=raw.includes('@')?raw:raw+'@gmail.com';
+  aMsg.textContent='';
+  const r=mode==='up'?await sb.auth.signUp({email,password:pw,options:{data:{username:un,display_name:dName.value.trim()||un}}}):await sb.auth.signInWithPassword({email,password:pw});
+  if(r.error){aMsg.textContent=fix(r.error.message);return}
+  if(!r.data.session){aMsg.textContent='ثبت‌نام شد ولی تأیید ایمیل روشن است؛ در Supabase خاموشش کن.';return}
+  start(r.data.user);
+}
+async function logout(){if(chan)sb.removeChannel(chan);await sb.auth.signOut();uid=null;auth.hidden=false;app.hidden=true}
+async function start(u){
+  uid=u.id;auth.hidden=true;app.hidden=false;await load();
+  chan=sb.channel('rt').on('postgres_changes',{event:'*',schema:'public'},()=>{clearTimeout(tmr);tmr=setTimeout(load,300)}).subscribe();
+}
+async function load(){
+  const[p,c,b]=await Promise.all([sb.from('profiles').select('*'),sb.from('categories').select('*').order('id'),sb.from('busy').select('*')]);
+  const e=p.error||c.error||b.error;if(e){msg.textContent=e.message}
+  const prof=p.data||[];mp=prof.find(x=>x.id===uid);pt=prof.find(x=>x.id!==uid)||null;
+  cats=c.data||[];
+  items=(b.data||[]).map(r=>({id:r.id,o:r.owner,day:r.day,s:r.start_min,e:r.end_min,cat:r.category_id,rep:r.repeat_weekly,date:r.on_date}));
+  const own=cats.filter(x=>x.owner===uid);if(!own.find(x=>x.id===selCat))selCat=own[0]?.id;
+  draw();
+}
+const base=()=>{const t=new Date();t.setHours(12,0,0,0);t.setDate(t.getDate()-((t.getDay()+1)%7)+off*7);return t};
+const dateOf=d=>{const t=base();t.setDate(t.getDate()+d);return t};
+const cat=id=>cats.find(c=>c.id===id)||{name:'سایر',color:'#7a8794'};
+const who=i=>i.o===uid?0:1;
+const on=(i,p,d,k)=>who(i)===p&&(i.rep?i.day===d:i.date===k);
+const names=()=>[mp?.display_name||'من',pt?.display_name||'پارتنر'];
+function tab(n){p1.hidden=n!==1;p2.hidden=n!==2;p3.hidden=n!==3;p4.hidden=n!==4;t1.className=n===1?'on':'';t2.className=n===2?'on':'';t3.className=n===3?'on':'';t4.className=n===4?'on':'';scrollTo(0,0)}
+const openD=new Set();
+const jp=d=>{const o={};new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:'numeric',month:'numeric',day:'numeric'}).formatToParts(d).forEach(p=>o[p.type]=p.value);return{y:+o.year,m:+o.month,d:+o.day}};
+const addD=(d,n)=>{const t=new Date(d);t.setDate(t.getDate()+n);return t};
+const mFirst=d=>addD(d,1-jp(d).d);
+function monthDays(){const n=new Date();n.setHours(12,0,0,0);let s=mFirst(n);for(let i=0;i<Math.abs(moff);i++)s=moff>0?mFirst(addD(s,35)):mFirst(addD(s,-1));const m=jp(s).m,a=[];for(let d=s;jp(d).m===m;d=addD(d,1))a.push(d);return a}
+function mo(n){moff+=n;drawMonth()}
+const fh=m=>{const h=Math.floor(m/60),r=m%60;return (h?fa(h)+' ساعت':'')+(h&&r?' و ':'')+(r?fa(r)+' دقیقه':'')||'۰'};
+function drawMonth(){
+  const ds=monthDays(),nm=names();
+  mWho.innerHTML=`<option value="0">${esc(nm[0])}</option>`+(pt?`<option value="1">${esc(nm[1])}</option>`:'');
+  if(!pt)mWhoV=0;mWho.value=mWhoV;
+  mLabel.textContent=jd(ds[0],{month:'long'})+' '+jd(ds[0],{year:'numeric'});
+  mSub.textContent=fa(ds.length)+' روز';
+  const t={};
+  ds.forEach(d=>{const wd=(d.getDay()+1)%7,k=iso(d);items.filter(i=>on(i,mWhoV,wd,k)).forEach(i=>{const o=t[i.cat]||(t[i.cat]={m:0,n:0});o.m+=i.e-i.s;o.n++})});
+  const es=Object.entries(t).sort((a,b)=>b[1].m-a[1].m),tot=es.reduce((s,e)=>s+e[1].m,0);
+  if(!tot){mBody.innerHTML='<div class="mut">در این ماه برنامه‌ای ثبت نشده.</div>';return}
+  let cum=0;
+  const segs=es.map(([id,o])=>{const c=cat(+id),p=o.m/tot*100,x=`<circle cx="21" cy="21" r="15.915" fill="none" stroke="${c.color}" stroke-width="6" stroke-dasharray="${p} ${100-p}" stroke-dashoffset="${25-cum}"/>`;cum+=p;return x}).join('');
+  mBody.innerHTML=`<svg class="donut" viewBox="0 0 42 42" role="img" aria-label="نمودار دایره‌ای"><circle cx="21" cy="21" r="15.915" fill="none" stroke="var(--line)" stroke-width="6"/>${segs}<text x="21" y="21.5" text-anchor="middle" font-size="5.2" font-weight="800" style="fill:var(--ink)">${fa(Math.round(tot/60))}</text><text x="21" y="26.5" text-anchor="middle" font-size="3" style="fill:var(--mut)">ساعت</text></svg>`+
+  es.map(([id,o])=>{const c=cat(+id);return `<div class="lg"><span class="dot" style="background:${c.color}"></span><span class="grow">${esc(c.name)}<div class="mut">${fa(o.n)} نوبت</div></span><span style="text-align:end"><b>${fh(o.m)}</b><div class="mut">${fa(Math.round(o.m/tot*100))}٪</div></span></div>`}).join('')+
+  `<div class="lg"><b class="grow">مجموع</b><b>${fh(tot)}</b></div>`;
+}
+let inl=null,colOpen=null,colPick=null;
+const t24=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+function togInl(id){inl=inl===id?null:id;drawForm()}
+function inlHtml(i){
+  const dt=new Date(i.date.replace(/-/g,'/'));dt.setHours(12,0,0,0);
+  const d=i.rep?i.day:Math.round((dt-dateOf(0))/864e5);
+  const own=cats.filter(c=>c.owner===uid);
+  return `<div class="ied"><label>روز<select id="ieD">${DAYS.map((n,k)=>`<option value="${k}"${k===d?' selected':''}>${n} · ${jd(dateOf(k),{day:'numeric',month:'long'})}</option>`).join('')}</select></label>
+  <div class="two"><label>از<input type="time" id="ieS" value="${t24(i.s)}"></label><label>تا<input type="time" id="ieE" value="${t24(i.e)}"></label></div>
+  <label style="margin-top:8px">دسته<select id="ieC">${own.map(c=>`<option value="${c.id}"${c.id===i.cat?' selected':''}>${esc(c.name)}</option>`).join('')}</select></label>
+  <label style="flex-direction:row;align-items:center;gap:6px;font-size:14px;color:var(--ink);margin:10px 0"><input type="checkbox" id="ieR"${i.rep?' checked':''} style="width:auto;height:auto"> هر هفته تکرار شود</label>
+  <div class="row"><button class="pri" onclick="ieSave(${i.id},this)">ذخیره</button><button onclick="togInl(${i.id})">بستن</button><span id="ieMsg" class="err"></span></div></div>`}
+async function ieSave(id,btn){return guard(btn,'در حال ذخیره…',async()=>{
+  const i=items.find(x=>x.id===id),d=+ieD.value,st=tm(ieS.value||'0:0'),en=tm(ieE.value||'0:0'),rep=ieR.checked;
+  if(!ieS.value||!ieE.value||en<=st){ieMsg.textContent='ساعت پایان باید بعد از شروع باشد.';return false}
+  const r=await sb.from('busy').update({day:d,start_min:st,end_min:en,category_id:+ieC.value,repeat_weekly:rep,on_date:rep&&i.date?i.date:iso(dateOf(d))}).eq('id',id);
+  if(r.error){ieMsg.textContent=r.error.message;return false}
+  inl=null;await load()},'ذخیره شد ✓')}
+function openCol(id){colOpen=id;colPick=cats.find(x=>x.id===id)?.color;edit.innerHTML='';drawForm()}
+function pickCol(c){colPick=c;edit.innerHTML='';drawForm()}
+function closeCol(){colOpen=null;edit.innerHTML='';drawForm()}
+async function saveCol(id){const c=colPick;colOpen=null;await setCol(id,c)}
+async function setCol(id,c){const k=cats.find(x=>x.id===id);if(k)k.color=c;edit.innerHTML='';draw();await sb.from('categories').update({color:c}).eq('id',id)}
+function pickNew(c){const e=$('newCat');newName=e?e.value:newName;newCol=c;edit.innerHTML='';drawForm()}
+const sws=(cur,fn)=>`<div class="sws">`+PAL.map(x=>`<button type="button" class="sw${x===cur?' on':''}" style="background:${x}" onclick="${fn(x)}" aria-label="رنگ"></button>`).join('')+`</div>`;
+const row=i=>{const c=cat(i.cat);return `<div class="it"><span class="dot" style="background:${c.color}"></span><span class="grow">${esc(c.name)}</span><span class="mut tm">${hm(i.s)} تا ${hm(i.e)}</span></div>`};
+const dayList=(p,d,k)=>items.filter(i=>on(i,p,d,k)).sort((x,y)=>x.s-y.s);
+function detail(d,k){const nm=names();return [0,1].map(p=>{const l=dayList(p,d,k);return `<div class="dp"><b>${esc(nm[p])}</b>${l.length?l.map(row).join(''):'<div class="mut">برنامه‌ای ثبت نشده</div>'}</div>`}).join('')}
+function togDay(k){const e=$('det-'+k);if(!e)return;e.hidden=!e.hidden;e.hidden?openD.delete(k):openD.add(k);const c=$('chev-'+k);if(c)c.textContent=e.hidden?'▾':'▴'}
+function drawTheirs(){
+  const nm=names()[1];
+  t3.textContent=pt?'برنامه‌ی '+nm:'برنامه‌ی او';
+  p3Title.textContent=pt?'برنامه‌ی '+nm:'برنامه‌ی پارتنر';
+  noPartner3.hidden=!!pt;
+  let h='';
+  if(pt)for(let d=0;d<7;d++){
+    const dt=dateOf(d),k=iso(dt),l=dayList(1,d,k),isT=k===iso(new Date());
+    h+=`<div class="card d3${isT?' now':''}"><h2 style="display:flex;justify-content:space-between"><span>${DAYS[d]}${isT?'<span class="badge">امروز</span>':''}</span><span class="mut">${jd(dt,{day:'numeric',month:'long'})}</span></h2>${l.length?l.map(row).join(''):'<div class="mut">برنامه‌ای ثبت نشده</div>'}</div>`;
+  }
+  theirs.innerHTML=h;
+}
+function freeSlots(d,k){
+  const b=items.filter(i=>on(i,0,d,k)||on(i,1,d,k)).map(i=>[Math.max(i.s,F0),Math.min(i.e,F1)]).filter(x=>x[1]>x[0]).sort((a,b)=>a[0]-b[0]);
+  const out=[];let cur=F0;
+  b.forEach(x=>{if(x[0]-cur>=minLen)out.push([cur,x[0]]);cur=Math.max(cur,x[1])});
+  if(F1-cur>=minLen)out.push([cur,F1]);
+  return out;
+}
+const pos=(s,e)=>`inset-inline-start:${(s-T0)/(T1-T0)*100}%;width:${(e-s)/(T1-T0)*100}%`;
+const bar=(p,d,k)=>items.filter(i=>on(i,p,d,k)).map(i=>{const c=cat(i.cat);return `<i style="${pos(i.s,i.e)};background:${c.color}" title="${esc(c.name)} ${hm(i.s)} تا ${hm(i.e)}"></i>`}).join('');
+function drawForm(){
+  const fv=fDay.value,tdx=(new Date().getDay()+1)%7;fDay.innerHTML=DAYS.map((d,i)=>`<option value="${i}">${d} · ${jd(dateOf(i),{day:'numeric',month:'long'})}</option>`).join('');fDay.value=fv!==''?fv:(off===0?tdx:0);
+  const own=cats.filter(c=>c.owner===uid);
+  chips.innerHTML=own.map(c=>`<button class="chip ${c.id===selCat?'sel':''}" onclick="selCat=${c.id};drawForm()"><span class="dot" style="background:${c.color}"></span>${esc(c.name)}</button>`).join('');
+  edit.hidden=!editing;edBtn.textContent=editing?'✓ بستن ویرایش':'✎ ویرایش دسته‌ها';
+  if(editing&&!edit.contains(document.activeElement))edit.innerHTML=own.map(c=>`<div class="cr"><div class="row"><span class="dot" style="background:${c.color}"></span><input type="text" class="grow" value="${esc(c.name)}" onchange="rc(${c.id},this.value)" style="width:auto"></div>${colOpen===c.id?sws(colPick,x=>`pickCol('${x}')`)+`<div class="row"><button class="pri" onclick="saveCol(${c.id})">ذخیره</button><button onclick="closeCol()">بستن</button></div>`:`<button onclick="openCol(${c.id})" style="margin-top:8px">🎨 تغییر رنگ</button>`}</div>`).join('')+`<div class="cr"><div class="mut">دسته‌ی جدید</div><div class="row"><span class="dot" style="background:${newCol}"></span><input type="text" id="newCat" class="grow" placeholder="اسم دسته" value="${esc(newName)}" style="width:auto"><button onclick="addCat()">افزودن</button></div>${sws(newCol,x=>`pickNew('${x}')`)}</div>`;
+  const wa=iso(dateOf(0)),wz=iso(dateOf(6));
+  const mine=items.filter(i=>i.o===uid&&(i.rep||(i.date>=wa&&i.date<=wz))).sort((x,y)=>(x.rep?x.day:7)-(y.rep?y.day:7)||x.s-y.s);
+  if(!(inl&&$('mine').contains(document.activeElement)))$('mine').innerHTML=mine.length?mine.map(i=>{const c=cat(i.cat);
+    const when=i.rep?'هر '+DAYS[i.day]:jd(new Date(i.date.replace(/-/g,'/')),{day:'numeric',month:'long'});
+    return `<div class="item" style="flex-wrap:wrap"><span><span class="dot" style="background:${c.color};margin-inline-end:6px"></span>${esc(c.name)} · ${when} · ${hm(i.s)} تا ${hm(i.e)}</span><span style="white-space:nowrap"><button class="ib pen" onclick="togInl(${i.id})" aria-label="ویرایش">${inl===i.id?'▴':'✎'}</button><button class="x" onclick="del(${i.id},this)" aria-label="حذف">×</button></span>${inl===i.id?inlHtml(i):''}</div>`}).join(''):'<div class="mut">برای این هفته چیزی ثبت نشده.</div>';
+  $('link').innerHTML=pt?`<h2>پارتنر</h2><div class="row" style="justify-content:space-between"><span>به <b>${esc(pt.display_name)}</b> وصل هستی.</span><button onclick="disc(this)">قطع اتصال</button></div>`
+    :`<h2>اتصال به پارتنر</h2><div class="mut">کد من را به پارتنرت بده، یا کد او را اینجا وارد کن.</div><div class="row" style="margin:8px 0"><span class="code">${esc(mp?.invite_code||'')}</span><button onclick="copyCode()">کپی</button><button class="pri" onclick="shareCode()">ارسال</button><span id="shMsg" class="mut"></span></div><div class="row"><input type="text" id="pCode" class="grow" placeholder="کد پارتنر" dir="ltr" style="width:auto" autocapitalize="characters"><button class="pri" onclick="conn(this)">اتصال</button></div><div id="cMsg" class="err"></div>`;
+}
+function draw(){
+  drawForm();
+  {const n=new Date();todayTxt.textContent=jd(n,{weekday:'long'})+'، '+jd(n,{day:'numeric',month:'long'})}
+  const nm=names(),a=dateOf(0),z=dateOf(6);
+  noPartner.hidden=!!pt;
+  wkLabel.textContent=off===0?'این هفته':off===1?'هفته‌ی بعد':off===-1?'هفته‌ی قبل':'هفته‌ی '+fa(off);
+  wkSub.textContent=jd(a,{day:'numeric',month:'long'})+' تا '+jd(z,{day:'numeric',month:'long'});wkLabel3.textContent=wkLabel.textContent;wkSub3.textContent=wkSub.textContent;wkLabel1.textContent=wkLabel.textContent;wkSub1.textContent=wkSub.textContent;
+  let h='<div class="axis">'+[6,12,18,24].map(x=>`<span style="inset-inline-start:${(x*60-T0)/(T1-T0)*100}%">${fa(x)}</span>`).join('')+'</div>',tot=0,hs=[];
+  for(let d=0;d<7;d++){
+    const dt=dateOf(d),k=iso(dt),fr=freeSlots(d,k),m=fr.reduce((s,x)=>s+x[1]-x[0],0);tot+=m;hs.push(m);
+    const isT=k===iso(new Date());
+    h+=`<div class="card day${isT?' now':''}" onclick="togDay('${k}')"><h2><span>${DAYS[d]}${isT?'<span class="badge">امروز</span>':''}</span><span class="mut">${jd(dt,{day:'numeric',month:'long'})} <span id="chev-${k}">${openD.has(k)?'▴':'▾'}</span></span></h2>
+    <div class="line"><b>${esc(nm[0])}</b><div class="bar">${bar(0,d,k)}</div></div>
+    <div class="line"><b>${esc(nm[1])}</b><div class="bar">${bar(1,d,k)}</div></div>
+    <div class="line"><b>مشترک</b><div class="bar">${fr.map(x=>`<i class="f" style="${pos(x[0],x[1])}"></i>`).join('')}</div></div>
+    <div class="free ${fr.length?'':'none'}">${fr.length?'خالی: '+fr.map(x=>hm(x[0])+' تا '+hm(x[1])).join('، '):'وقت خالی مشترکی نیست'}</div><div class="det" id="det-${k}"${openD.has(k)?'':' hidden'}>${detail(d,k)}</div></div>`;
+  }
+  days.innerHTML=h;drawTheirs();drawMonth();
+  total.textContent=fa(Math.round(tot/6)/10)+' ساعت وقت خالی مشترک';
+  const mx=Math.max(...hs,1);
+  chart.innerHTML=hs.map((m,i)=>`<div><i style="height:${m/mx*66}px"></i>${'ش ی د س چ پ ج'.split(' ')[i]}</div>`).join('');
+}
+async function add(btn){await guard(btn,'در حال ذخیره…',async()=>{
+  const d=+fDay.value,s=tm(fS.value||'0:0'),e=tm(fE.value||'0:0'),rep=fRep.checked,dt=iso(dateOf(d));
+  if(!fS.value||!fE.value||e<=s){msg.textContent='ساعت پایان باید بعد از شروع باشد.';return false}
+  if(!selCat){msg.textContent='یک دسته انتخاب کن.';return false}
+  msg.textContent='';
+  if(items.some(i=>i.id!==eid&&i.o===uid&&i.s===s&&i.e===e&&i.cat===selCat&&(i.rep?i.day===d:(!rep&&i.date===dt)))){toast('این مورد قبلاً ثبت شده','bad');return false}
+  const row={day:d,start_min:s,end_min:e,category_id:selCat,repeat_weekly:rep,on_date:dt};
+  const r=eid?await sb.from('busy').update(row).eq('id',eid):await sb.from('busy').insert(row);
+  if(r.error){msg.textContent=r.error.message;return false}
+  eid=null;await load();
+},'ذخیره شد ✓')}
+async function del(id,btn){return guard(btn,'…',async()=>{const r=await sb.from('busy').delete().eq('id',id);if(r.error){msg.textContent=r.error.message;return false}await load()},'حذف شد')}
+function wk(n){off+=n;draw()}
+function togEdit(){editing=!editing;edit.innerHTML='';drawForm()}
+async function rc(id,v){v=v.trim();if(!v)return;await sb.from('categories').update({name:v}).eq('id',id);load()}
+async function addCat(){const v=newCat.value.trim();if(!v)return;await sb.from('categories').insert({name:v,color:newCol});newName='';newCol=PAL[(PAL.indexOf(newCol)+1)%PAL.length];edit.innerHTML='';load()}
+async function conn(btn){return guard(btn,'در حال اتصال…',async()=>{const c=pCode.value.trim();if(!c)return false;const r=await sb.rpc('connect_partner',{code:c});if(r.error){cMsg.textContent=r.error.message;return false}await load()},'به پارتنر وصل شدی ✓')}
+async function copyCode(){
+  const c=mp?.invite_code||'';if(!c)return;
+  try{await navigator.clipboard.writeText(c)}catch(e){const t=document.createElement('textarea');t.value=c;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}
+  shMsg.textContent='کپی شد ✓';setTimeout(()=>{if($('shMsg'))shMsg.textContent=''},2000)
+}
+async function shareCode(){
+  const c=mp?.invite_code||'';if(!c)return;
+  const text='کد دعوت من در «وقت خالی ما»: '+c;
+  if(navigator.share){try{await navigator.share({text});return}catch(e){if(e&&e.name==='AbortError')return}}
+  await copyCode();shMsg.textContent='کپی شد؛ حالا در پیام‌رسان بفرست ✓'
+}
+async function disc(btn){if(!confirm('اتصال به پارتنر قطع شود؟'))return;return guard(btn,'…',async()=>{await sb.rpc('disconnect_partner');await load()},'اتصال قطع شد')}
+(async()=>{setMode('in');const{data:{session}}=await sb.auth.getSession();session?start(session.user):(auth.hidden=false)})();
+</script>
+<div id="tstEl" class="toast" role="status" hidden></div>
+</body>
+</html>
